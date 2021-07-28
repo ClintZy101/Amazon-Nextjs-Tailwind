@@ -21,7 +21,6 @@ export const basketSlice = createSlice({
 
       if (index >= 0) {
         // item exists in basket... remove it
-        // using filter() would remove everything including id
         newBasket.splice(index, 1)
       } else {
         console.warn(

@@ -6,11 +6,24 @@ import Header from '../components/Header'
 import CheckOutProduct from '../components/CheckOutProduct';
 import { signIn, useSession } from 'next-auth/client';
 import Currency from "react-currency-formatter"
+import { loadStripe } from '@stripe/stripe-js';
+import axios from 'axios';
+const stripePromise = loadStripe(process.env.stripe_public_key)
 
 const checkout = () => {
     const items = useSelector(selectItems);
     const total = useSelector(selectTotal);
     const [session] = useSession();
+    
+    const createCheckoutSession = async () => {
+        const stripe = await stripePromise; 
+        //  call backend to create a checkout session...
+        const checkoutSession = await axios.post('/api/create-checkout-session',
+        {
+            items: items,
+            email: session.user.email
+        })
+    } 
 
     return (
         <div>
@@ -53,9 +66,11 @@ const checkout = () => {
                                 SubTotal ({items.length} items): {" "}
                              <span className="font-bold">
                                     <Currency quantity={total} currency="USD" />
-                            </span>
+                            </span> 
                             </h2>
-                            <button onClick={!session && signIn} className={`button mt-2 ${!session && "from-gray-300 to-gray-500 border-gray-200 text-gray-300"}`}>
+                            <button
+                            role="link"
+                             onClick={!session ?  signIn : createCheckoutSession} className={`button mt-2 ${!session && "from-gray-300 to-gray-500 border-gray-200 text-gray-300"}`}>
                                 {!session ? "Sign In to Checkout" : "Proceed to Checkout"}
                             </button>
                         </>
